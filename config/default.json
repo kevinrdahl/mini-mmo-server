@@ -1,0 +1,9 @@
+{
+    "db":{
+        "type":"sqlite",
+        "host":"./localdb.sqlite"
+    },
+    "ws":{
+        "port":9000
+    }
+}
