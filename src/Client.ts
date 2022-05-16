@@ -1,4 +1,6 @@
 import { WebSocket } from "ws";
+import Room from "./Game/Room";
+import World from "./Game/World";
 
 const wsStateNames = {
     "0":"CONNECTING",
@@ -12,6 +14,8 @@ let nextId = 1;
 export default class Client {
     id:number
     lastActivity:number
+    world?:World
+    room?:Room
 
     constructor(private socket:WebSocket) {
         this.id = nextId++

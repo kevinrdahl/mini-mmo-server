@@ -9,6 +9,7 @@ export default class GameObject {
     id:number
     position:Vector2 = new Vector2()
     movement:Vector2 = new Vector2()
+    facing:number = 0
     character?:Character
 
     constructor(public room:Room) {
@@ -18,9 +19,10 @@ export default class GameObject {
     describe():PlainObject {
         let desc:PlainObject = {
             position: this.position,
-            movement: this.movement
+            movement: this.movement,
+            facing: this.facing
         }
-        if (this.character) desc["character"] = this.character
+        if (this.character) desc.character = this.character
         return desc
     }
 }

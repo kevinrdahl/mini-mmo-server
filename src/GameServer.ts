@@ -1,13 +1,17 @@
 import config from "config";
 import { WebSocket, WebSocketServer } from "ws";
 import Client from "./Client";
+import World from "./Game/World";
 import MessageHandler from "./Messages/MessageHandler";
 import PingMessage from "./Messages/PingMessage";
+import Updater from "./Util/Updater";
 
 export default class GameServer {
     ws:WebSocketServer
     clients:Set<Client> = new Set()
     messages:MessageHandler = new MessageHandler()
+    world:World = new World()
+    updater:Updater = new Updater()
 
     constructor() {
         this.initMessageTypes()
@@ -34,11 +38,15 @@ export default class GameServer {
                 this.messages.handle(msg, client)
             })
         })
+
+        this.updater.start(1/15, (delta) => {
+            this.world.update(delta)
+        })
     }
 
     initMessageTypes() {
         this.messages.register(PingMessage, (ping) => {
-            console.log(`${ping.fromClient}: PING!`)
+            console.log(`${ping.fromClient} PING!`)
             ping.response.ok = 1
         })
     }

@@ -57,7 +57,7 @@ export default class MessageHandler {
         const pair = this.registeredTypes.get(type)
         if (pair !== undefined) {
             const [msgType, handlers] = pair
-            const msg:Message = msgType()
+            const msg:Message = new msgType()
             msg.fromClient = fromClient
 
             //If sent as an array, inflate an object from it.
