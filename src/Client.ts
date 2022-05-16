@@ -13,9 +13,15 @@ export default class Client {
     id:number
     lastActivity:number
 
-    constructor(public socket:WebSocket) {
+    constructor(private socket:WebSocket) {
         this.id = nextId++
         this.lastActivity = Date.now()
+    }
+
+    send(msg:string|object) {
+        const str = (typeof msg === "string") ? msg : JSON.stringify(msg)
+        console.log(`${this} SEND ${str}`)
+        this.socket.send(str)
     }
 
     toString():string {
