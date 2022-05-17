@@ -38,6 +38,8 @@ export default class Client {
     }
 
     toString():string {
-        return `[Client ${this.id} (${wsStateNames[this.socket.readyState]})]`
+        const parts = [`Client ${this.id} (${wsStateNames[this.socket.readyState]})`]
+        if (this.account) parts.push(`"${this.account.username}"`)
+        return `[${parts.join(" ")}]`
     }
 }

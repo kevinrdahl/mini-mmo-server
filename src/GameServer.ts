@@ -32,9 +32,9 @@ export default class GameServer {
             const client = new Client(socket)
             this.clients.add(client);
 
-            console.log(`Client connected: ${client}`)
+            console.log(`${client} connected`)
             socket.on("close", () => {
-                console.log(`Client disconnected: ${client}`)
+                console.log(`${client} disconnected`)
                 this.clients.delete(client);
             })
 

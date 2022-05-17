@@ -32,7 +32,7 @@ export default class ClientManager {
                 username:msg.username!,
                 password: hash
             })
-            console.log(`${fromClient} created account ${msg.username}`)
+            console.log(`${fromClient} created account ${account.username}`)
             return true
         })
 
@@ -62,6 +62,7 @@ export default class ClientManager {
         }
 
         client.account = account
+        console.log(`${client} logged in`)
     }
 
     logout(client:Client, reason:string = "") {

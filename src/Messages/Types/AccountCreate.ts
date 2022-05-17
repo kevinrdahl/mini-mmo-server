@@ -3,7 +3,7 @@ import JSONUtil from "../../Util/JSONUtil";
 import Request from "../Request";
 
 export default class AccountCreate extends Request {
-    type = "createAccount"
+    type = "accountCreate"
     username?:string
     password?:string
 
