@@ -7,7 +7,7 @@ import Request from "./Request";
 export default class MessageHandler {
     private registeredTypes = new Map<string, [any, any[]]>()
 
-    register<T extends Message>(msgType: (new()=>T), handler?:(msg:T)=>void) {
+    register<T extends Message>(msgType: (new()=>T), handler?:(msg:T, fromClient:Client)=>Promise<boolean>) {
         const tmp = new msgType()
         const type = tmp.type
         
@@ -22,7 +22,7 @@ export default class MessageHandler {
         }
     }
 
-    handle(raw:string, fromClient:Client) {
+    async handle(raw:string, fromClient:Client) {
         let parsed:any
         try {
             parsed = JSON.parse(raw)
@@ -48,7 +48,7 @@ export default class MessageHandler {
             json = {type:type}
         } else if (typeof parsed === "object") {
             json = parsed
-            type = JSONUtil.GetStr(json, "type", "")
+            type = JSONUtil.getStr(json, "type", "")
         } else {
             console.log(`Invalid json from ${fromClient}: ${raw}`)
             return
@@ -58,7 +58,6 @@ export default class MessageHandler {
         if (pair !== undefined) {
             const [msgType, handlers] = pair
             const msg:Message = new msgType()
-            msg.fromClient = fromClient
 
             //If sent as an array, inflate an object from it.
             //We don't need to be strict here. The resulting object will be treated as user input in readJSON.
@@ -85,10 +84,13 @@ export default class MessageHandler {
 
             //Call handlers registered to this message type.
             let handled = false
+            let ok = true
             try {
                 for (const handler of handlers) {
-                    handler(msg)
                     handled = true
+                    const result:boolean = await handler(msg, fromClient)
+                    ok = ok && result
+                    if (!result) break
                 }
             } catch (e) {
                 console.log(`Error in message handler for type ${type}: ${e}`)
@@ -104,6 +106,7 @@ export default class MessageHandler {
                     msg.addError(`Unhandled message type ${type}`)
                 }
                 msg.response.id = msg.id
+                msg.response.ok = ok && handled
                 fromClient.send(msg.response)
             }
         }

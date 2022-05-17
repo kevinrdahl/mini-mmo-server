@@ -1,7 +1,7 @@
 import { PlainObject } from "./Interfaces";
 
 export default abstract class JSONUtil {
-    static GetInt(json:PlainObject, key:string, defaultValue?:number):number {
+    static getInt(json:PlainObject, key:string, defaultValue?:number):number {
         let value = json[key]
         if (value !== undefined) {
             switch (typeof value) {
@@ -19,7 +19,7 @@ export default abstract class JSONUtil {
         }
     }
 
-    static GetStr(json:PlainObject, key:string, defaultValue?:string):string {
+    static getStr(json:PlainObject, key:string, defaultValue?:string):string {
         let value = json[key]
         if (value === undefined) throw new Error(`String key "${key}" not found`);
         if (typeof value === "string") return value

@@ -1,20 +1,27 @@
 import config from "config";
+import { Sequelize } from "sequelize/types";
 import { WebSocket, WebSocketServer } from "ws";
 import Client from "./Client";
+import ClientManager from "./ClientManager";
 import World from "./Game/World";
 import MessageHandler from "./Messages/MessageHandler";
-import PingMessage from "./Messages/PingMessage";
+import AccountCreate from "./Messages/Types/AccountCreate";
+import AccountLogin from "./Messages/Types/AccountLogin";
+import Ping from "./Messages/Types/Ping";
+import Account from "./Models/Account";
 import Updater from "./Util/Updater";
 
 export default class GameServer {
     ws:WebSocketServer
-    clients:Set<Client> = new Set()
+    clients:ClientManager
     messages:MessageHandler = new MessageHandler()
     world:World = new World()
     updater:Updater = new Updater()
 
-    constructor() {
-        this.initMessageTypes()
+    constructor(public db:Sequelize) {
+        this.clients = new ClientManager(this)
+
+        this.registerMessageHandlers()
 
         const port:number = config.get("ws.port");
         this.ws = new WebSocketServer({port:port}, () => {
@@ -29,7 +36,6 @@ export default class GameServer {
             socket.on("close", () => {
                 console.log(`Client disconnected: ${client}`)
                 this.clients.delete(client);
-                //todo: remove them and their character from rooms
             })
 
             socket.on("message", (data, isBinary) => {
@@ -44,10 +50,12 @@ export default class GameServer {
         })
     }
 
-    initMessageTypes() {
-        this.messages.register(PingMessage, (ping) => {
-            console.log(`${ping.fromClient} PING!`)
-            ping.response.ok = 1
+    registerMessageHandlers() {
+        this.clients.registerMessageHandlers()
+
+        this.messages.register(Ping, async (msg, fromClient) => {
+            console.log(`${fromClient} PING!`)
+            return true
         })
     }
 }

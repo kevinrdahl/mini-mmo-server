@@ -1,7 +1,7 @@
 {
     "db":{
-        "type":"sqlite",
-        "host":"./localdb.sqlite"
+        "dialect":"sqlite",
+        "storage":"./localdb.sqlite"
     },
     "ws":{
         "port":9000

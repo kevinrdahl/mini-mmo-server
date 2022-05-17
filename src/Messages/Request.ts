@@ -7,15 +7,17 @@ export default abstract class Request extends Message {
     response:PlainObject = {}
 
     readJSON(json: PlainObject): void {
-        this.id = JSONUtil.GetInt(json, "id")
+        this.id = JSONUtil.getInt(json, "id")
     }
 
-    toJSON(): PlainObject {
-        return {id:this.id}
-    }
-
+    /**
+     * 
+     * @param msg 
+     * @returns false (for one-liners)
+     */
     addError(msg:string) {
         if (this.response.errors === undefined) this.response.errors = [msg]
         else this.response.errors.push(msg)
+        return false
     }
 }
