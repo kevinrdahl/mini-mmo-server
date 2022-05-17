@@ -108,6 +108,7 @@ export default class MessageHandler {
                 msg.response.id = msg.id
                 msg.response.ok = ok && handled
                 fromClient.send(msg.response)
+                for (let func of msg.onResponseFuncs) func()
             }
         }
     }

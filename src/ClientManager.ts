@@ -47,7 +47,9 @@ export default class ClientManager {
                 return msg.addError("Password does not match")
             }
 
-            this.login(fromClient, account)
+            msg.onResponse(() => {
+                this.login(fromClient, account)
+            })
             return true
         })
     }
@@ -62,6 +64,8 @@ export default class ClientManager {
         }
 
         client.account = account
+        //later this will be based on their input, but for now there is one world
+        this.server.world.addClient(client)
         console.log(`${client} logged in`)
     }
 
