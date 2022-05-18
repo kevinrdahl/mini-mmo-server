@@ -1,10 +1,10 @@
 import { DataTypes, Model, Sequelize } from "sequelize";
+import Character from "./Character";
 
 export default class Account extends Model {
     declare id:number
     declare username:string
     declare password:string
-    //declare createTime:Date (confirm!)
 
     static initialize(sequelize:Sequelize) {
         Account.init({
@@ -22,6 +22,6 @@ export default class Account extends Model {
                 type: DataTypes.STRING(100),
                 allowNull: false
             }
-        }, {sequelize})
+        }, {sequelize, modelName:"account"})
     }
 }

@@ -12,7 +12,7 @@ export default class MessageHandler {
         const type = tmp.type
         
         const existing = this.registeredTypes.get(type)
-        if (existing !== undefined ) {
+        if (existing) {
             if (handler) {
                 existing[1].push(handler)
             }
@@ -54,9 +54,8 @@ export default class MessageHandler {
             return
         }
 
-        const pair = this.registeredTypes.get(type)
-        if (pair !== undefined) {
-            const [msgType, handlers] = pair
+        if (this.registeredTypes.has(type)) {
+            const [msgType, handlers] = this.registeredTypes.get(type)!
             const msg:Message = new msgType()
 
             //If sent as an array, inflate an object from it.

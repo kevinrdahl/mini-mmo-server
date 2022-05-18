@@ -3,7 +3,9 @@ import Client from "./Client";
 import GameServer from "./GameServer";
 import AccountCreate from "./Messages/Types/AccountCreate";
 import AccountLogin from "./Messages/Types/AccountLogin";
+import CharacterCreate from "./Messages/Types/CharacterCreate";
 import Account from "./Models/Account";
+import Character from "./Models/Character";
 
 export default class ClientManager {
     clients:Set<Client> = new Set()
@@ -47,9 +49,22 @@ export default class ClientManager {
                 return msg.addError("Password does not match")
             }
 
+            //Get a list of their characters to return
+            const characters = await Character.findAll({where:{accountId:account.id}})
+            msg.response.characters = characters.map(char => char.describe())
+
             msg.onResponse(() => {
                 this.login(fromClient, account)
             })
+            return true
+        })
+
+        this.server.messages.register(CharacterCreate, async (msg, fromClient) => {
+            if (!fromClient.world) return msg.addError("Not logged in")
+            if (fromClient.character) return msg.addError("Already logged in")
+
+            
+
             return true
         })
     }

@@ -2,6 +2,7 @@ import { WebSocket } from "ws";
 import Room from "./Game/Room";
 import World from "./Game/World";
 import Account from "./Models/Account";
+import Character from "./Models/Character";
 
 const wsStateNames = {
     "0":"CONNECTING",
@@ -16,6 +17,7 @@ export default class Client {
     id:number
     lastActivity:number
     account?:Account
+    character?:Character
     world?:World
     room?:Room
 

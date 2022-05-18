@@ -1,6 +1,5 @@
 import Vector2 from "../Geom/Vector2";
 import { PlainObject } from "../Util/Interfaces";
-import Character from "./Character";
 import Room from "./Room";
 
 var nextId = 1
@@ -10,7 +9,6 @@ export default class GameObject {
     position:Vector2 = new Vector2()
     movement:Vector2 = new Vector2()
     facing:number = 0
-    character?:Character
 
     constructor(public room:Room) {
         this.id = nextId++
@@ -22,7 +20,6 @@ export default class GameObject {
             movement: this.movement,
             facing: this.facing
         }
-        if (this.character) desc.character = this.character
         return desc
     }
 }
