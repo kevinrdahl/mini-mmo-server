@@ -1,5 +1,10 @@
 import { GenerateName } from "./Util/NameGen";
 
-for (let i = 0; i < 20; i++) {
-    console.log(GenerateName())
+GenerateName()
+
+console.time("names")
+for (let i = 0; i < 25; i++) {
+    const name = GenerateName()
+    console.log(name)
 }
+console.timeEnd("names")
