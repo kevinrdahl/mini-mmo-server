@@ -11,10 +11,10 @@ export default class World {
     constructor() {
         this.id = nextId++
 
-        for (let i = 0; i < 5; i++) {
+        //for (let i = 0; i < 5; i++) {
             let room = new Room(this)
             this.rooms.set(room.id, room)
-        }
+        //}
     }
 
     toString():string {

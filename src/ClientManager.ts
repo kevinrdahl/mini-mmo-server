@@ -110,7 +110,6 @@ export default class ClientManager {
         client.account = account
         //later this will be based on their input, but for now there is one world
         this.server.world.addClient(client)
-        console.log(`${client} logged in`)
     }
 
     logout(client:Client, reason:string = "") {

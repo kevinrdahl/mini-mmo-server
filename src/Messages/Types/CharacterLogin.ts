@@ -7,6 +7,7 @@ export default class CharacterLogin extends Request {
     characterId?:number
 
     readJSON(json: PlainObject): void {
+        super.readJSON(json)
         this.characterId = JSONUtil.getInt(json, "characterId")
     }
 }

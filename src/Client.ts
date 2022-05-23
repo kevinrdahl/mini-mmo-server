@@ -1,5 +1,6 @@
 import { WebSocket } from "ws";
 import Room from "./Game/Room";
+import Unit from "./Game/Unit";
 import World from "./Game/World";
 import Account from "./Models/Account";
 import Character from "./Models/Character";
@@ -20,6 +21,7 @@ export default class Client {
     character?:Character
     world?:World
     room?:Room
+    unit?:Unit
 
     get isConnected():boolean { return this.socket.readyState === WebSocket.OPEN }
 
