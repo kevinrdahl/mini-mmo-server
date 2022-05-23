@@ -1,11 +1,16 @@
 import * as bcrypt from "bcrypt"
+import { createNoSubstitutionTemplateLiteral } from "typescript";
 import Client from "./Client";
+import World from "./Game/World";
 import GameServer from "./GameServer";
 import AccountCreate from "./Messages/Types/AccountCreate";
 import AccountLogin from "./Messages/Types/AccountLogin";
 import CharacterCreate from "./Messages/Types/CharacterCreate";
+import CharacterLogin from "./Messages/Types/CharacterLogin";
 import Account from "./Models/Account";
 import Character from "./Models/Character";
+import { GenerateName } from "./Util/NameGen";
+import { PickRandom } from "./Util/Utils";
 
 export default class ClientManager {
     clients:Set<Client> = new Set()
@@ -39,15 +44,13 @@ export default class ClientManager {
         })
 
         this.server.messages.register(AccountLogin, async (msg, fromClient) => {
-            const account = await Account.findOne({where:{username:msg.username}})
-            if (!account) {
-                return msg.addError("User does not exist")
-            }
+            if (fromClient.account) return msg.addError("Already logged in")
 
-            const success = await bcrypt.compare(msg.password!, account.password)
-            if (!success) {
-                return msg.addError("Password does not match")
-            }
+            const account = await Account.findOne({where:{username:msg.username}})
+            if (!account) return msg.addError("User does not exist")
+
+            const passwordMatch = await bcrypt.compare(msg.password!, account.password)
+            if (!passwordMatch) return msg.addError("Password does not match")
 
             //Get a list of their characters to return
             const characters = await Character.findAll({where:{accountId:account.id}})
@@ -60,10 +63,36 @@ export default class ClientManager {
         })
 
         this.server.messages.register(CharacterCreate, async (msg, fromClient) => {
-            if (!fromClient.world) return msg.addError("Not logged in")
+            if (!fromClient.world || !fromClient.account) return msg.addError("Not logged in")
             if (fromClient.character) return msg.addError("Already logged in")
 
-            
+            const character = await Character.create({
+                name: GenerateName(),
+                accountId: fromClient.account?.id,
+                worldId: fromClient.world?.id
+            })
+
+            msg.response.character = character.describe()
+
+            return true
+        })
+
+        this.server.messages.register(CharacterLogin, async (msg, fromClient) => {
+            if (!fromClient.world || !fromClient.account) return msg.addError("Not logged in")
+            if (fromClient.character) return msg.addError("Already logged in")
+
+            const character = await Character.findOne({where:{id:msg.characterId}})
+            if (!character) return msg.addError("No such character")
+            if (character.accountId != fromClient.account.id) return msg.addError("Character belongs to another account")
+
+            fromClient.character = character
+
+            msg.onResponse(() => {
+                //put them in a random room I guess?
+                const rooms = Array.from(this.server.world.rooms.values())
+                const room = PickRandom(rooms)!
+                room.addClient(fromClient)
+            })
 
             return true
         })
@@ -88,6 +117,7 @@ export default class ClientManager {
         if (client.world) {
             client.world.removeClient(client)
         }
+        client.character = undefined
         client.account = undefined
         if (client.isConnected) {
             client.send({

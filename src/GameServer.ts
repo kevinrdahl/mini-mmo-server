@@ -40,7 +40,7 @@ export default class GameServer {
 
             socket.on("message", (data, isBinary) => {
                 const msg = data.toString()
-                console.log(`${client} RECV ${msg}`)
+                //console.log(`${client} RECV ${msg}`)
                 this.messages.handle(msg, client)
             })
         })

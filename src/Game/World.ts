@@ -17,17 +17,24 @@ export default class World {
         }
     }
 
+    toString():string {
+        return `[World ${this.id}]`;
+    }
+
     update(delta:number) {
         for (const room of this.rooms.values()) room.update(delta)
     }
 
     addClient(client:Client) {
         if (this.clients.has(client)) return
+        this.clients.add(client)
         client.world = this
         client.send({
             type:"setWorld",
             worldId:this.id
         })
+
+        console.log(`${this} client added: ${client}`)
     }
 
     removeClient(client:Client) {
@@ -35,10 +42,15 @@ export default class World {
             if (client.room) client.room.removeClient(client)
             this.clients.delete(client)
             client.world = undefined
-            client.send({
-                type:"setWorld",
-                worldId:0
-            })
+
+            if (client.isConnected) {
+                client.send({
+                    type:"setWorld",
+                    worldId:0
+                })
+            }
+
+            console.log(`${this} client removed: ${client}`)
         }
     }
 }

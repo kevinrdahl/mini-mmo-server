@@ -29,6 +29,7 @@ export default class Character extends Model {
 
     describe():PlainObject {
         return {
+            id: this.id,
             name: this.name
         }
     }

@@ -13,6 +13,10 @@ export default class Room {
         this.id = nextId++
     }
 
+    toString():string {
+        return `[Room ${this.id}]`
+    }
+
     update(delta:number) {
         
     }
@@ -27,6 +31,8 @@ export default class Room {
             roomId:this.id
         })
         //TODO: Send a message to the client, fully describing the room and its contents.
+
+        console.log(`${this} client added: ${client}`)
     }
 
     removeClient(client:Client) {
@@ -34,9 +40,14 @@ export default class Room {
         //TODO: Remove their character from the room.
         this.clients.delete(client);
         client.room = undefined
-        client.send({
-            type:"setRoom",
-            roomId:0
-        })
+
+        if (client.isConnected) {
+            client.send({
+                type:"setRoom",
+                roomId:0
+            })
+        }
+
+        console.log(`${this} client removed: ${client}`)
     }
 }

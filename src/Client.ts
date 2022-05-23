@@ -35,13 +35,15 @@ export default class Client {
         }
 
         const str = (typeof msg === "string") ? msg : JSON.stringify(msg)
-        console.log(`${this} SEND ${str}`)
+        //console.log(`${this} SEND ${str}`)
         this.socket.send(str)
     }
 
     toString():string {
         const parts = [`Client ${this.id} (${wsStateNames[this.socket.readyState]})`]
         if (this.account) parts.push(`"${this.account.username}"`)
+        if (this.world) parts.push(`World ${this.world.id}`)
+        if (this.room) parts.push(`Room ${this.room.id}`)
         return `[${parts.join(" ")}]`
     }
 }

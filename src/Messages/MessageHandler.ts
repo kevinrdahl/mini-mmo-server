@@ -1,11 +1,13 @@
 import Client from "../Client";
 import { PlainObject } from "../Util/Interfaces";
 import JSONUtil from "../Util/JSONUtil";
+import { ArrayRemove } from "../Util/Utils";
 import Message from "./Message";
 import Request from "./Request";
 
 export default class MessageHandler {
     private registeredTypes = new Map<string, [any, any[]]>()
+    private clientRequestQueues = new WeakMap<Client, Request[]>()
 
     register<T extends Message>(msgType: (new()=>T), handler?:(msg:T, fromClient:Client)=>Promise<boolean>) {
         const tmp = new msgType()
@@ -22,7 +24,7 @@ export default class MessageHandler {
         }
     }
 
-    async handle(raw:string, fromClient:Client) {
+    handle(raw:string, fromClient:Client) {
         let parsed:any
         try {
             parsed = JSON.parse(raw)
@@ -81,33 +83,68 @@ export default class MessageHandler {
                 return
             }
 
-            //Call handlers registered to this message type.
-            let handled = false
-            let ok = true
-            try {
-                for (const handler of handlers) {
-                    handled = true
-                    const result:boolean = await handler(msg, fromClient)
-                    ok = ok && result
-                    if (!result) break
-                }
-            } catch (e) {
-                console.log(`Error in message handler for type ${type}: ${e}`)
-                if (msg instanceof Request) {
-                    const errMsg = (e instanceof Error) ? e.message : ""+e
-                    msg.addError(errMsg)
+            if (msg instanceof Request) {
+                let queue = this.clientRequestQueues.get(fromClient)
+                if (queue) {
+                    if (queue.length >= 10) {
+                        console.log(`${fromClient} has too many pending requests`)
+                        fromClient.send({
+                            id: msg.id,
+                            ok: false,
+                            errors: ["Too many pending requests"]
+                        })
+                    } else {
+                        queue.push(msg)
+                    }
+
+                    return
+                } else {
+                    this.clientRequestQueues.set(fromClient, [msg])
                 }
             }
 
-            //Respond
+            this.handleInternal(msg, fromClient)
+        }
+    }
+
+    private async handleInternal(msg:Message, fromClient:Client) {
+        //Call handlers registered to this message type.
+        let handled = false
+        let ok = true
+        try {
+            const [msgType, handlers] = this.registeredTypes.get(msg.type)!
+            for (const handler of handlers) {
+                handled = true
+                const result:boolean = await handler(msg, fromClient)
+                ok = ok && result
+                if (!result) break
+            }
+        } catch (e) {
+            console.log(`Error in message handler for type ${msg.type}: ${e}`)
             if (msg instanceof Request) {
-                if (!handled) {
-                    msg.addError(`Unhandled message type ${type}`)
+                const errMsg = (e instanceof Error) ? e.message : ""+e
+                msg.addError(errMsg)
+            }
+        }
+
+        //Respond
+        if (msg instanceof Request) {
+            if (!handled) {
+                msg.addError(`Unhandled message type ${msg.type}`)
+            }
+            msg.response.id = msg.id
+            msg.response.ok = ok && handled
+            fromClient.send(msg.response)
+            for (let func of msg.onResponseFuncs) func()
+
+            let queue = this.clientRequestQueues.get(fromClient)
+            if (queue) {
+                ArrayRemove(queue, msg)
+                if (queue.length == 0) {
+                    this.clientRequestQueues.delete(fromClient)
+                } else {
+                    this.handleInternal(queue[0], fromClient)
                 }
-                msg.response.id = msg.id
-                msg.response.ok = ok && handled
-                fromClient.send(msg.response)
-                for (let func of msg.onResponseFuncs) func()
             }
         }
     }
