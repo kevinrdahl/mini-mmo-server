@@ -24,7 +24,7 @@ export default class MessageHandler {
         }
     }
 
-    handle(raw:string, fromClient:Client) {
+    parseMessage(raw:string, fromClient:Client):Message|undefined {
         let parsed:any
         try {
             parsed = JSON.parse(raw)
@@ -82,29 +82,36 @@ export default class MessageHandler {
                 }
                 return
             }
-
-            if (msg instanceof Request) {
-                let queue = this.clientRequestQueues.get(fromClient)
-                if (queue) {
-                    if (queue.length >= 10) {
-                        console.log(`${fromClient} has too many pending requests`)
-                        fromClient.send({
-                            id: msg.id,
-                            ok: false,
-                            errors: ["Too many pending requests"]
-                        })
-                    } else {
-                        queue.push(msg)
-                    }
-
-                    return
-                } else {
-                    this.clientRequestQueues.set(fromClient, [msg])
-                }
-            }
-
-            this.handleInternal(msg, fromClient)
+            return msg
         }
+    }
+
+    handle(msg:Message, fromClient:Client) {
+        if (msg instanceof Request) {
+            let queue = this.clientRequestQueues.get(fromClient)
+            if (queue) {
+                if (queue.length >= 10) {
+                    console.log(`${fromClient} has too many pending requests`)
+                    fromClient.send({
+                        id: msg.id,
+                        ok: false,
+                        errors: ["Too many pending requests"]
+                    })
+                } else {
+                    queue.push(msg)
+                }
+                return
+            } else {
+                this.clientRequestQueues.set(fromClient, [msg])
+            }
+        }
+
+        this.handleInternal(msg, fromClient)
+    }
+
+    handleRaw(raw:string, fromClient:Client) {
+        const msg = this.parseMessage(raw, fromClient)
+        if (msg) this.handle(msg, fromClient)
     }
 
     private async handleInternal(msg:Message, fromClient:Client) {
