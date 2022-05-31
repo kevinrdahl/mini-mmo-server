@@ -1,10 +1,10 @@
 import { expect } from "chai"
 import { WebSocket } from "ws"
-import Client from "../src/Client"
-import MessageHandler from "../src/Messages/MessageHandler"
-import Request from "../src/Messages/Request"
-import AccountCreate from "../src/Messages/Types/AccountCreate"
-import { PlainObject } from "../src/Util/Interfaces"
+import Client from "../Client"
+import MessageHandler from "../Messages/MessageHandler"
+import Request from "../Messages/Request"
+import AccountCreate from "../Messages/Types/AccountCreate"
+import { PlainObject } from "../Util/Interfaces"
 
 describe("Message Handling", () => {
     it("Parse JSON Object", () => {

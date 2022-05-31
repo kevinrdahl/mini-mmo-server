@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import { GenerateName } from "../src/Util/NameGen"
+import { GenerateName } from "../Util/NameGen"
 
 describe("Names", () => {
     it("Generate some names", () => {
