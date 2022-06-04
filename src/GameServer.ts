@@ -1,14 +1,11 @@
 import config from "config";
 import { Sequelize } from "sequelize/types";
-import { WebSocket, WebSocketServer } from "ws";
+import { WebSocketServer } from "ws";
 import Client from "./Client";
 import ClientManager from "./ClientManager";
 import World from "./Game/World";
 import MessageHandler from "./Messages/MessageHandler";
-import AccountCreate from "./Messages/Types/AccountCreate";
-import AccountLogin from "./Messages/Types/AccountLogin";
 import Ping from "./Messages/Types/Ping";
-import Account from "./Models/Account";
 import Updater from "./Util/Updater";
 
 export default class GameServer {
