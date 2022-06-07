@@ -5,6 +5,7 @@ import Client from "./Client";
 import ClientManager from "./ClientManager";
 import World from "./Game/World";
 import MessageHandler from "./Messages/MessageHandler";
+import Move from "./Messages/Types/Move";
 import Ping from "./Messages/Types/Ping";
 import Updater from "./Util/Updater";
 
@@ -52,6 +53,11 @@ export default class GameServer {
 
         this.messages.register(Ping, async (msg, fromClient) => {
             console.log(`${fromClient} PING!`)
+            return true
+        })
+
+        this.messages.register(Move, async (msg, fromClient) => {
+            if (fromClient.room) fromClient.room.onClientMessage(msg, fromClient)
             return true
         })
     }

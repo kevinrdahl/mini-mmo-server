@@ -57,6 +57,10 @@ export default class Vector2 {
 		return new Vector2(Math.round(this.x), Math.round(this.y))
 	}
 
+	equals(vec:Vector2):boolean {
+		return vec.x == this.x && vec.y == this.y
+	}
+
 	toString(): string {
 		return `[Vector2 (${this.x},${this.y})]`
 	}

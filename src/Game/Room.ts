@@ -1,4 +1,6 @@
 import Client from "../Client"
+import Message from "../Messages/Message"
+import Move from "../Messages/Types/Move"
 import {PlainObject} from "../Util/Interfaces"
 import Unit from "./Unit"
 import World from "./World"
@@ -9,6 +11,8 @@ export default class Room {
 	id: number
 	clients: Set<Client> = new Set()
 	units: Map<number, Unit> = new Map()
+    unitUpdates: Map<number, PlainObject> = new Map()
+    updateTime:number = Date.now()
 
 	constructor(public world: World) {
 		this.id = nextId++
@@ -18,7 +22,15 @@ export default class Room {
 		return `[Room ${this.id}]`
 	}
 
-	update(delta: number) {}
+	update(delta: number) {
+        this.updateTime = Date.now()
+        for (const unit of this.units.values()) {
+            if (unit.movement.length() > 0) {
+                unit.position.add(unit.movement.mult(100))
+            }
+        }
+        this.broadcastUpdates()
+    }
 
 	addClient(client: Client) {
 		this.addClientUnit(client)
@@ -52,6 +64,50 @@ export default class Room {
 
 		console.log(`${this} client removed: ${client}`)
 	}
+
+    onClientMessage(msg:Message, client:Client) {
+        //Paranoid checks
+        if (!this.clients.has(client)) return
+        if (!client.unit) return
+        const unit = this.units.get(client.unit.id)
+        if (!unit) return
+
+        if (msg instanceof Move && !msg.movement!.equals(unit.movement)) {
+            unit.movement = msg.movement!
+
+            const update:PlainObject = {movement:unit.movement.toJSON()}
+            if (unit.movement.length() > 0) update.facing = unit.movement.angle()
+            this.pushUnitUpdate(unit.id, update)
+        }
+    }
+
+    pushUnitUpdate(unitId:number, update:PlainObject) {
+        let existing = this.unitUpdates.get(unitId)
+        if (existing) {
+            Object.assign(existing, update)
+        } else {
+            this.unitUpdates.set(unitId, update)
+        }
+    }
+
+    broadcastUpdates() {
+        if (this.unitUpdates.size == 0) return
+
+        const msg:PlainObject = {
+            type: "update",
+            time: this.updateTime,
+            units: {}
+        }
+
+        for (const [id, update] of this.unitUpdates) {
+            const unit = this.units.get(id)
+            if (unit) update.position = unit.position.toJSON()
+            msg.units[""+id] = update
+        }
+
+        this.unitUpdates.clear()
+        this.broadcast(msg)
+    }
 
 	addUnit(unit: Unit) {
 		this.units.set(unit.id, unit)
