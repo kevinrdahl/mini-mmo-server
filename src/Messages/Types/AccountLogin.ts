@@ -1,6 +1,17 @@
 import { PlainObject } from "../../Util/Interfaces";
 import JSONUtil from "../../Util/JSONUtil";
 import Request from "../Request";
+import Ajv from "ajv"
+
+const validate = new Ajv().compile({
+    type: "object",
+    properties: {
+        username: {type: "string"},
+        password: {type: "string"},
+        worldId: {type: "integer"}
+    },
+    required: ["username", "password", "worldId"]
+})
 
 export default class AccountLogin extends Request {
     type = "accountLogin"
@@ -10,8 +21,9 @@ export default class AccountLogin extends Request {
 
     readJSON(json: PlainObject): void {
         super.readJSON(json)
-        this.username = JSONUtil.getStr(json, "username")
-        this.password = JSONUtil.getStr(json, "password")
-        this.worldId = JSONUtil.getInt(json, "worldId")
+        if (!validate(json)) throw validate.errors![0]
+        this.username = json.username
+        this.password = json.password
+        this.worldId = json.worldId
     }
 }

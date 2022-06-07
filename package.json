@@ -16,6 +16,7 @@
     "@types/mocha": "^9.1.1",
     "@types/sequelize": "^4.28.13",
     "@types/ws": "^8.5.3",
+    "ajv": "^8.11.0",
     "bcrypt": "^5.0.1",
     "chai": "^4.3.6",
     "config": "^3.3.7",
