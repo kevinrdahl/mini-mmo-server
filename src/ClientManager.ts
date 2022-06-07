@@ -8,7 +8,7 @@ import CharacterLogin from "./Messages/Types/CharacterLogin";
 import Account from "./Models/Account";
 import Character from "./Models/Character";
 import { GenerateName } from "./Util/NameGen";
-import { PickRandom } from "./Util/Utils";
+import { pickRandom } from "./Util/Utils";
 
 export default class ClientManager {
     clients:Set<Client> = new Set()
@@ -88,7 +88,7 @@ export default class ClientManager {
             msg.onResponse(() => {
                 //put them in a random room I guess?
                 const rooms = Array.from(this.server.world.rooms.values())
-                const room = PickRandom(rooms)!
+                const room = pickRandom(rooms)!
                 room.addClient(fromClient)
             })
 

@@ -1,7 +1,7 @@
 import Client from "../Client"
 import {PlainObject} from "../Util/Interfaces"
 import JSONUtil from "../Util/JSONUtil"
-import {ArrayRemove} from "../Util/Utils"
+import {arrayRemove} from "../Util/Utils"
 import Message from "./Message"
 import Request from "./Request"
 
@@ -147,7 +147,7 @@ export default class MessageHandler {
 
 			let queue = this.clientRequestQueues.get(fromClient)
 			if (queue) {
-				ArrayRemove(queue, msg)
+				arrayRemove(queue, msg)
 				if (queue.length == 0) {
 					this.clientRequestQueues.delete(fromClient)
 				} else {

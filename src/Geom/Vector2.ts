@@ -1,3 +1,5 @@
+import { roundTo } from "../Util/Utils"
+
 export default class Vector2 {
 	constructor(public x = 0, public y = 0) {}
 
@@ -53,8 +55,8 @@ export default class Vector2 {
 		return new Vector2(this.x, this.y)
 	}
 
-	rounded(): Vector2 {
-		return new Vector2(Math.round(this.x), Math.round(this.y))
+	rounded(places:number = 0): Vector2 {
+		return new Vector2(roundTo(this.x, places), roundTo(this.y, places))	
 	}
 
 	equals(vec:Vector2):boolean {

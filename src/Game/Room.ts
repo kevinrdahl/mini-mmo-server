@@ -2,6 +2,7 @@ import Client from "../Client"
 import Message from "../Messages/Message"
 import Move from "../Messages/Types/Move"
 import {PlainObject} from "../Util/Interfaces"
+import { roundTo } from "../Util/Utils"
 import Unit from "./Unit"
 import World from "./World"
 
@@ -26,7 +27,7 @@ export default class Room {
         this.updateTime = Date.now()
         for (const unit of this.units.values()) {
             if (unit.movement.length() > 0) {
-                unit.position.add(unit.movement.mult(100))
+                unit.position = unit.position.add(unit.movement.mult(100 * delta))
             }
         }
         this.broadcastUpdates()
@@ -75,8 +76,8 @@ export default class Room {
         if (msg instanceof Move && !msg.movement!.equals(unit.movement)) {
             unit.movement = msg.movement!
 
-            const update:PlainObject = {movement:unit.movement.toJSON()}
-            if (unit.movement.length() > 0) update.facing = unit.movement.angle()
+            const update:PlainObject = {movement:unit.movement.rounded(2)}
+            if (unit.movement.length() > 0) update.facing = roundTo(unit.movement.angle(), 2)
             this.pushUnitUpdate(unit.id, update)
         }
     }
@@ -95,13 +96,13 @@ export default class Room {
 
         const msg:PlainObject = {
             type: "update",
-            time: this.updateTime,
+            //time: this.updateTime,
             units: {}
         }
 
         for (const [id, update] of this.unitUpdates) {
             const unit = this.units.get(id)
-            if (unit) update.position = unit.position.toJSON()
+            if (unit) update.position = unit.position.rounded()
             msg.units[""+id] = update
         }
 
