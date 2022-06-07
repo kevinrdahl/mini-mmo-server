@@ -1,3 +1,3 @@
 export interface PlainObject {
-    [index:string]: any
+	[index: string]: any
 }
